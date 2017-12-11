@@ -8,11 +8,15 @@ class Kindle:
     clippings_file = ''
     device_type = ''
     is_kindle = False
+    device_detected = False
 
     def __init__(self):
         with usb1.USBContext() as context:
             for device in context.getDeviceIterator(skip_on_error=True):
-                if device.getVendorID() == 0x1949:
+                lab126_device = device.getVendorID() == 0x1949
+                self.device_detected |= lab126_device
+
+                if lab126_device:
                     device_switcher = {
                         0x0002: 'Amazon Kindle',
                         0x0004: 'Amazon Kindle 3/4/Paperwhite',
@@ -22,7 +26,8 @@ class Kindle:
                         0x0222: 'Amazon Kindle Fire 7"',
                         0x0800: 'Fire Phone'
                     }
-                    self.device_type = device_switcher.get(device.getProductID(), hex(device.getProductID()))
+                    default = hex(device.getVendorID())+":"+hex(device.getProductID())
+                    self.device_type = device_switcher.get(device.getProductID(), default)
 
                     type_switcher = {
                         0x0002: True,
@@ -34,22 +39,21 @@ class Kindle:
                         0x0800: False
                     }
                     self.is_kindle = type_switcher.get(device.getProductID(), False)
-                    
-                    print("*INFO* Found "+self.device_type+' ('+('Android','Kindle Reader')[self.is_kindle]+')\n')
+
+                    device_type_str = ('Android', 'Kindle Reader')[self.is_kindle]
+                    print("*INFO* Found "+self.device_type+' ('+device_type_str+')\n')
 
         if self.is_kindle:
             path_switcher = {
                 'linux': '/mnt/parallels/Kindle',
                 'win32': 'F:',
-            	'cygwin': 'F:',
-            	'darwin': '/Volumes/Kindle'
+                'cygwin': 'F:',
+                'darwin': '/Volumes/Kindle'
             }
             self.documents_dir = os.path.join(path_switcher.get(sys.platform, ''), 'documents')
 
-            file_witcher = {
-                'linux': 'My%20Clipplings.txt',
-                'win32': 'My Clipplings.txt',
-            	'cygwin': 'My Clipplings.txt',
-            	'darwin': 'My%20Clipplings.txt'
-            }
-            self.clippings_file = os.path.join(self.documents_dir, file_witcher.get(sys.platform, 'My Clipplings.txt'))
+            files = [f for f in os.scandir(self.documents_dir) if f.name.endswith('.txt')]
+            files = [f for f in files if f.name.startswith('My Clippings')]
+
+            if len(files) == 1:
+                self.clippings_file = files[0].path

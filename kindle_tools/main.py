@@ -8,7 +8,7 @@ def run_project(args):
 
     if options.known.do_clippings:
         clip = Clippings()
-        print(repr(clip.split()))
+        
 
 if __name__ == '__main__':
     run_project(sys.argv)
