@@ -1,0 +1,6 @@
+.vscode
+.DS_Store
+.idea
+*.pyc
+*.lock
+docs/_build
