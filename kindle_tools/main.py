@@ -1,16 +1,14 @@
 import sys
-
-from lib.project import Project
 from lib.options import Options
+from lib.clippings import Clippings
 
 def run_project(args):
     options = Options()
-    options.parse(args[1:])
+    options.parse(args)
 
-    project = Project(options)
-
-    print('Printing date:'+project.date().decode('utf-8'))
-    print('Printing example arg:'+project.print_example_arg())
+    if options.known.do_clippings:
+        clip = Clippings()
+        print(repr(clip.split()))
 
 if __name__ == '__main__':
     run_project(sys.argv)

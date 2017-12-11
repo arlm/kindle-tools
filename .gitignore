@@ -4,3 +4,6 @@
 *.pyc
 *.lock
 docs/_build
+data
+kindle_tools.egg-info
+*.egg

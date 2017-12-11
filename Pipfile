@@ -7,11 +7,10 @@ name = "pypi"
 
 [packages]
 
+libusb1 = "*"
 
 [dev-packages]
 
 nose = "*"
 mockito = "*"
 sphinx = "*"
-
-
