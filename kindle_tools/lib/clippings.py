@@ -6,10 +6,10 @@ class Clippings:
     kindle_device = None
     entries = []
 
-    def __init__(self):
-        self.kindle_device = Kindle()
+    def __init__(self, directory):
+        self.kindle_device = Kindle(directory)
 
-        if not self.kindle_device.device_detected:
+        if not self.kindle_device.device_detected and not directory:
             print('No Kindle device detected !')
             sys.exit(-100)
 

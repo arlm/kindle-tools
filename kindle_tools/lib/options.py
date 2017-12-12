@@ -1,6 +1,7 @@
 # External
 import sys
-from argparse import ArgumentParser, FileType
+import os
+from argparse import ArgumentParser, ArgumentTypeError
 
 class Options:
 
@@ -11,6 +12,7 @@ class Options:
         usage = './bin/kindle-tool'
         self.parser = ArgumentParser(usage=usage, description='Extracts information from Kindle devices and apps')
         self.parser.add_argument('-c', '--clippings', dest='do_clippings', help='Parses the Kindle device clippings file', action='store_true')
+        self.parser.add_argument('--dir', dest='directory', help='The path o the foler cointaining the clippings file', action='store', type=self.is_dir)
         self.parser.add_argument('--version', action='version', version='kindle-tool 0.1.0')
 
     def check_flags(self):
@@ -25,3 +27,11 @@ class Options:
             self.parser.print_help()
             sys.exit(-2)
 
+    @staticmethod
+    def is_dir(dirname):
+        """Checks if a path is an actual directory"""
+        if not os.path.isdir(dirname):
+            msg = "{0} is not a directory".format(dirname)
+            raise ArgumentTypeError(msg)
+        else:
+            return dirname
