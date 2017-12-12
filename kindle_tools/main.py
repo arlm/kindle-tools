@@ -8,8 +8,8 @@ def run_project(args):
 
     if options.known.do_clippings:
         clip = Clippings(options.known.directory)
-        clip.parse(clip.split())
-        print(repr(clip.entries))
+        clip.parse()
+        #print(repr(clip.entries))
 
 if __name__ == '__main__':
     run_project(sys.argv)
