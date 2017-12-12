@@ -45,10 +45,13 @@ class Clippings:
         
         summary = data.loc[:,('book','author', 'date', 'type')]
         summary['date'] = summary['date'].apply(lambda x: x.year)
-        summary = summary.drop_duplicates().groupby(['date', 'book', 'author'])['type'].count()
-        
+        summary = summary.drop_duplicates().groupby(['date', 'book', 'author']).count().rename(columns={'type':'count'})
+
+
+        yearly_summary = summary.groupby('date').count().rename(columns={'count':'books read'})
+
         output = StringIO()
-        summary.to_csv(output, header = True)
+        yearly_summary.to_csv(output, header = True)
         output.seek(0)
         print(prettytable.from_csv(output))
 
@@ -66,25 +69,43 @@ class Clippings:
             datetime_format='mmm d yyyy hh:mm:ss',
             date_format='mmmm dd yyyy')
 
-        # workbook  = writer.book
-        # summary_worksheet = writer.sheets['Summary']
-        # clippings_worksheet = writer.sheets['Clippings']
-
-        # format1 = workbook.add_format({'num_format': '#,##0.00'})
-        # format2 = workbook.add_format({'num_format': '0%'})
-        # header_format = workbook.add_format({
-        #     'bold': True,
-        #     'text_wrap': True,
-        #     'valign': 'top',
-        #     'fg_color': '#D7E4BC',
-        #     'border': 1})
-
-        # for col_num, value in enumerate(summary.columns.values):
-        #     summary_worksheet.write(0, col_num + 1, value, header_format)
-
         summary.to_excel(writer, sheet_name='Summary')
         notes.to_excel(writer, sheet_name='Clippings')
+
+        row = len(summary.index) + 3
+        yearly_summary.to_excel(writer, startrow=row, sheet_name='Summary')
+
+        workbook  = writer.book
+        str_format = workbook.add_format({'align': 'right', 'valign': 'vcenter', 'bold': False, 'text_wrap': True})       
+        txt_format = workbook.add_format({'align': 'justify', 'valign': 'vcenter', 'bold': False, 'text_wrap': True})       
+        head_format = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'bold': True})
         
+        worksheet = writer.sheets['Summary']
+
+        book_len = data['book'].astype(str).apply(lambda x: len(x)).max().max() * 0.85
+        author_len = data['author'].astype(str).apply(lambda x: len(x)).max().max() * 0.85
+        
+        worksheet.set_column(0, 0, 4.5, head_format)
+        worksheet.set_row(0, None, head_format)
+        
+        worksheet.set_column(1, 1, book_len, str_format)
+        worksheet.set_column(2, 2, author_len, str_format)
+
+        worksheet = writer.sheets['Clippings']
+
+        worksheet.set_column(0, 0, 4.5, head_format)
+        worksheet.set_row(0, None, head_format)
+
+        worksheet.set_column(1, 1, author_len * 0.50, str_format)
+        worksheet.set_column(2, 2, book_len * 0.50, str_format)
+        worksheet.set_column(3, 3, 18, str_format)
+
+        location_len = data['location'].astype(str).apply(lambda x: len(x)).max().max()
+        worksheet.set_column(4, 4, location_len, str_format)
+        worksheet.set_column(5, 5, location_len * 0.60, str_format)
+        worksheet.set_column(6, 6, 75, txt_format)
+        worksheet.set_column(7, 7, 8, str_format)
+
         writer.save()
 
         end = time.time()
